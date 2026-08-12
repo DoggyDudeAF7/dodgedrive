@@ -1,0 +1,9 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000;width:100%;height:100%;overflow:hidden}video{width:100%;height:100%;object-fit:contain}</style>
+<video id="v" muted preload="auto" src="file:///C:/Users/student/Videos/Screen%20Recordings/Screen%20Recording%202026-08-12%20193636.mp4"></video>
+<script>
+  const v=document.querySelector('#v'),t=Number(new URLSearchParams(location.search).get('t')||0);
+  v.addEventListener('loadedmetadata',()=>{document.title=`duration=${v.duration}`;v.currentTime=Math.min(t,Math.max(0,v.duration-.05))},{once:true});
+  v.addEventListener('seeked',()=>v.pause());
+</script>
