@@ -361,7 +361,7 @@
     function clearScenarioProps(){for(const prop of G.scenarioProps)scene.remove(prop);G.scenarioProps=[]}
     function scenarioSolvable(specs){for(const lane of forwardLanes){for(const spec of specs){if(spec.direction==='oncoming'||spec.lane!==lane)continue;const blocksOther=specs.some(other=>other!==spec&&other.direction!=='oncoming'&&other.lane!==lane&&Math.abs(other.z-spec.z)<10);if(blocksOther)return false}}return specs.every(spec=>G.obstacles.every(o=>o.direction!==spec.direction||o.lane!==spec.lane||Math.abs(o.mesh.position.z-spec.z)>16))}
     function announceScenario(label){G.activeScenario=label;G.scenarioTimer=5.5;comboEl.textContent=label;comboEl.classList.add('on')}
-    const scenarioNames=['slow-truck','staggered-pair','fast-behind','bus-blindspot','sudden-braking','crowded-lane','accident-closure'];
+    const scenarioNames=['slow-truck','staggered-pair','fast-behind','bus-blindspot','crowded-lane','accident-closure'];
     function spawnScenario(kind=null,z=-150){
       let choices=scenarioNames.filter(name=>name!==G.lastScenario);kind=kind||choices[Math.floor(gameRandom()*choices.length)];const a=forwardLanes[Math.floor(gameRandom()*2)],b=forwardLanes.find(lane=>lane!==a),specs=[];let label='TRAFFIC SITUATION';
       const add=(lane,dz,speed,id,options={})=>specs.push({lane,z:z+dz,speed,id,direction:'forward',options:{lockedLane:true,scenario:kind,...options}});
