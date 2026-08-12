@@ -14,7 +14,7 @@ function Write-PublishLog([string]$message) {
 }
 
 function Get-WorkingTreeState {
-  return (git status --porcelain=v1 --untracked-files=all 2>$null) -join "`n"
+  return (& git -c "safe.directory=$projectRoot" status --porcelain=v1 --untracked-files=all 2>$null) -join "`n"
 }
 
 function Publish-Changes {
@@ -25,25 +25,25 @@ function Publish-Changes {
     return
   }
 
-  git add --all
-  git diff --cached --quiet
+  & git -c "safe.directory=$projectRoot" add --all
+  & git -c "safe.directory=$projectRoot" diff --cached --quiet
   if ($LASTEXITCODE -eq 0) { return }
 
   $message = "Auto-publish $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-  git commit -m $message
+  & git -c "safe.directory=$projectRoot" commit -m $message
   if ($LASTEXITCODE -ne 0) {
     Write-PublishLog 'Commit failed; push skipped.'
     return
   }
 
-  git remote get-url origin *> $null
+  & git -c "safe.directory=$projectRoot" remote get-url origin *> $null
   if ($LASTEXITCODE -ne 0) {
     Write-PublishLog 'Committed locally. Add a GitHub origin remote to enable automatic pushes.'
     return
   }
 
-  $branch = git branch --show-current
-  git push --set-upstream origin $branch
+  $branch = & git -c "safe.directory=$projectRoot" branch --show-current
+  & git -c "safe.directory=$projectRoot" push --set-upstream origin $branch
   if ($LASTEXITCODE -eq 0) {
     Write-PublishLog "Pushed $branch; GitHub Pages deployment has started."
   } else {
@@ -52,6 +52,12 @@ function Publish-Changes {
 }
 
 Write-PublishLog 'Event-based watcher started. Waiting for saved edits...'
+$initialState = Get-WorkingTreeState
+if ($initialState) {
+  Write-PublishLog 'Unsaved repository changes found at startup; publishing after validation.'
+  Start-Sleep -Seconds $debounceSeconds
+  try { Publish-Changes } catch { Write-PublishLog "Initial publish error: $($_.Exception.Message)" }
+}
 $watcher = [System.IO.FileSystemWatcher]::new($projectRoot, '*')
 $watcher.IncludeSubdirectories = $true
 $watcher.NotifyFilter = [System.IO.NotifyFilters]'FileName, DirectoryName, LastWrite, Size'
