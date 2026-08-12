@@ -3,7 +3,6 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $stateDirectory = Join-Path $projectRoot '.auto-publish'
 $logPath = Join-Path $stateDirectory 'auto-publish.log'
 $debounceSeconds = 5
-$pollMilliseconds = 1200
 
 New-Item -ItemType Directory -Force -Path $stateDirectory | Out-Null
 Set-Location -LiteralPath $projectRoot
@@ -52,22 +51,38 @@ function Publish-Changes {
   }
 }
 
-Write-PublishLog 'Watcher started. Waiting for saved edits...'
-$lastState = Get-WorkingTreeState
-$changedAt = if ($lastState) { Get-Date } else { $null }
+Write-PublishLog 'Event-based watcher started. Waiting for saved edits...'
+$watcher = [System.IO.FileSystemWatcher]::new($projectRoot, '*')
+$watcher.IncludeSubdirectories = $true
+$watcher.NotifyFilter = [System.IO.NotifyFilters]'FileName, DirectoryName, LastWrite, Size'
+$watcher.EnableRaisingEvents = $true
+$subscriptions = @(
+  Register-ObjectEvent $watcher Changed -SourceIdentifier 'DodgeDrive.Changed'
+  Register-ObjectEvent $watcher Created -SourceIdentifier 'DodgeDrive.Created'
+  Register-ObjectEvent $watcher Deleted -SourceIdentifier 'DodgeDrive.Deleted'
+  Register-ObjectEvent $watcher Renamed -SourceIdentifier 'DodgeDrive.Renamed'
+)
+$changedAt = $null
 
-while ($true) {
-  Start-Sleep -Milliseconds $pollMilliseconds
-  $state = Get-WorkingTreeState
-  if ($state -ne $lastState) {
-    $lastState = $state
-    $changedAt = if ($state) { Get-Date } else { $null }
-    continue
+try {
+  while ($true) {
+    $event = Wait-Event -Timeout 1
+    if ($event) {
+      $events = @($event) + @(Get-Event | Where-Object EventIdentifier -ne $event.EventIdentifier)
+      $relevant = $false
+      foreach ($item in $events) {
+        $path = $item.SourceEventArgs.FullPath
+        if ($path -and $path -notmatch '[\\/]\.git([\\/]|$)' -and $path -notmatch '[\\/]\.auto-publish([\\/]|$)') { $relevant = $true }
+        Remove-Event -EventIdentifier $item.EventIdentifier -ErrorAction SilentlyContinue
+      }
+      if ($relevant) { $changedAt = Get-Date }
+    }
+    if ($changedAt -and ((Get-Date) - $changedAt).TotalSeconds -ge $debounceSeconds) {
+      try { Publish-Changes } catch { Write-PublishLog "Publish error: $($_.Exception.Message)" }
+      $changedAt = $null
+    }
   }
-  if ($state -and $changedAt -and ((Get-Date) - $changedAt).TotalSeconds -ge $debounceSeconds) {
-    try { Publish-Changes } catch { Write-PublishLog "Publish error: $($_.Exception.Message)" }
-    $lastState = Get-WorkingTreeState
-    $changedAt = $null
-  }
+} finally {
+  foreach ($subscription in $subscriptions) { Unregister-Event -SubscriptionId $subscription.Id -ErrorAction SilentlyContinue }
+  $watcher.Dispose()
 }
-
