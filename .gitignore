@@ -1,0 +1,6 @@
+.auto-publish/
+.lamp-audit/
+.DS_Store
+Thumbs.db
+*.log
+
