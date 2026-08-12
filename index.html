@@ -372,7 +372,7 @@
       else if(kind==='sudden-braking'){add(a,0,13,'sedan',{slowAtZ:-76,slowSpeed:5});add(b,-27,10,'suv');label='BRAKING TRAFFIC AHEAD'}
       else if(kind==='crowded-lane'){add(a,0,8,'hatchback');add(a,-22,7.5,'van');add(a,-45,9,'sedan');add(b,-62,12,'sedan-sports');label='CROWDED LANE · OPEN LANE AVAILABLE'}
       else{add(a,-16,0,'suv',{hazard:true,angle:.22});add(a,-29,0,'sedan',{hazard:true,angle:-.16});label='ACCIDENT AHEAD · LANE CLOSED'}
-      if(!scenarioSolvable(specs))return false;for(const spec of specs)addObstacle(spec.lane,spec.z,spec.speed,spec.direction,spec.id,spec.options);
+      if(!scenarioSolvable(specs))return false;for(const spec of specs){const obstacle=addObstacle(spec.lane,spec.z,spec.speed,spec.direction,spec.id,spec.options);if(kind==='accident-closure')obstacle.staticWreck=true}
       if(kind==='accident-closure'){scenarioProp(roadSign('ACCIDENT LANE CLOSED'),-8.55,z+24);for(let dz=18;dz>=-8;dz-=5){const blend=(18-dz)/26,coneX=THREE.MathUtils.lerp(lanes[a]+(a===0?-1.3:1.3),lanes[a],blend);scenarioProp(cone(),coneX,z+dz)}scenarioProp(barrier(),lanes[a],z-38)}
       G.lastScenario=kind;announceScenario(label);return true
     }
