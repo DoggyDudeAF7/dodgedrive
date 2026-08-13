@@ -113,6 +113,16 @@ const expression = `(() => {
 const evaluation = await command('Runtime.evaluate', { expression, returnByValue: true });
 const result = evaluation.result.value;
 await new Promise(resolve => setTimeout(resolve, 250));
+if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
+  const forced = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.forceHighwayExitTransition()`, returnByValue: true });
+  const before = performance.now();
+  const stepped = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.step(6); window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
+  const elapsed = performance.now() - before, state = stepped.result.value;
+  if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || elapsed > 8000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled: ${JSON.stringify({ elapsed, state, runtimeExceptions })}`);
+  socket.close();
+  console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', elapsed, state }, null, 2));
+  process.exit(0);
+}
 async function press(code, key, windowsVirtualKeyCode) {
   await command('Input.dispatchKeyEvent', { type: 'keyDown', code, key, windowsVirtualKeyCode, nativeVirtualKeyCode: windowsVirtualKeyCode });
   await command('Input.dispatchKeyEvent', { type: 'keyUp', code, key, windowsVirtualKeyCode, nativeVirtualKeyCode: windowsVirtualKeyCode });
