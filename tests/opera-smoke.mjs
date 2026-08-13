@@ -117,6 +117,7 @@ if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
   const forced = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.forceHighwayExitTransition()`, returnByValue: true });
   const before = performance.now();
   const stepped = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.step(6); window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
+  if (stepped.exceptionDetails) throw new Error(`Highway exit browser exception: ${JSON.stringify(stepped.exceptionDetails)}`);
   const elapsed = performance.now() - before, state = stepped.result.value;
   if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || elapsed > 8000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled: ${JSON.stringify({ elapsed, state, runtimeExceptions })}`);
   socket.close();
