@@ -125,7 +125,7 @@
       renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(performanceScale.pixelRatio);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;host.prepend(renderer.domElement);
     }catch(e){document.querySelector('#error').classList.add('on');throw e}
     scene=new THREE.Scene();scene.background=new THREE.Color(0x78ccef);scene.fog=new THREE.Fog(0x9edbea,55,175);
-    camera=new THREE.PerspectiveCamera(58,1,.1,300);camera.position.set(0,5.3,10.7);camera.lookAt(0,1,-18);
+    camera=new THREE.PerspectiveCamera(58,1,.1,300);camera.position.set(0,5.3,10.7);camera.lookAt(0,1,-18);const mirrorCamera=new THREE.PerspectiveCamera(48,3,.1,180);
     const hemi=new THREE.HemisphereLight(0xdff5ff,0x42512d,1.2);scene.add(hemi);const sun=new THREE.DirectionalLight(0xfff1c6,3.8);sun.position.set(-15,25,12);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-.00025;sun.shadow.normalBias=.035;sun.shadow.camera.left=-24;sun.shadow.camera.right=24;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-10;sun.shadow.camera.near=.5;sun.shadow.camera.far=72;scene.add(sun);
     const sunBall=new THREE.Mesh(new THREE.SphereGeometry(5,24,16),new THREE.MeshBasicMaterial({color:0xffe26a}));sunBall.position.set(35,28,-100);scene.add(sunBall);
 
