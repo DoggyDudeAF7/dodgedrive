@@ -57,7 +57,7 @@ function command(method, params = {}) {
 await command('Page.enable');
 await command('Runtime.enable');
 if (reuseStartupTab) await command('Page.navigate', { url: testUrl });
-const fastFallbackTest = process.env.OPERA_SCENARIO_TEST === '1' || process.env.OPERA_REPLAY_PARTICLE_TEST === '1' || process.env.OPERA_CRASH_GARAGE_TEST === '1' || process.env.OPERA_LANE_TURN_TEST === '1' || process.env.OPERA_SPEED_STEER_TEST === '1' || process.env.OPERA_HORN_REACTION_TEST === '1' || process.env.OPERA_RAILWAY_TEST === '1' || process.env.OPERA_SYSTEMS_TEST === '1';
+const fastFallbackTest = process.env.OPERA_SCENARIO_TEST === '1' || process.env.OPERA_REPLAY_PARTICLE_TEST === '1' || process.env.OPERA_CRASH_GARAGE_TEST === '1' || process.env.OPERA_LANE_TURN_TEST === '1' || process.env.OPERA_SPEED_STEER_TEST === '1' || process.env.OPERA_HORN_REACTION_TEST === '1' || process.env.OPERA_RAILWAY_TEST === '1' || process.env.OPERA_SYSTEMS_TEST === '1' || process.env.OPERA_EXIT_TRANSITION_TEST === '1';
 const loadDeadline = Date.now() + (fastFallbackTest ? 5000 : 40000);
 while (Date.now() < loadDeadline) {
   const readiness = await command('Runtime.evaluate', { expression: `document.querySelector('#start') && !document.querySelector('#start').disabled`, returnByValue: true });
