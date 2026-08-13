@@ -57,7 +57,7 @@ function command(method, params = {}) {
 await command('Page.enable');
 await command('Runtime.enable');
 if (reuseStartupTab) await command('Page.navigate', { url: testUrl });
-const fastFallbackTest = process.env.OPERA_SCENARIO_TEST === '1' || process.env.OPERA_REPLAY_PARTICLE_TEST === '1' || process.env.OPERA_CRASH_GARAGE_TEST === '1' || process.env.OPERA_LANE_TURN_TEST === '1' || process.env.OPERA_SPEED_STEER_TEST === '1' || process.env.OPERA_HORN_REACTION_TEST === '1' || process.env.OPERA_RAILWAY_TEST === '1' || process.env.OPERA_SYSTEMS_TEST === '1' || process.env.OPERA_EXIT_TRANSITION_TEST === '1';
+const fastFallbackTest = process.env.OPERA_SCENARIO_TEST === '1' || process.env.OPERA_REPLAY_PARTICLE_TEST === '1' || process.env.OPERA_CRASH_GARAGE_TEST === '1' || process.env.OPERA_LANE_TURN_TEST === '1' || process.env.OPERA_SPEED_STEER_TEST === '1' || process.env.OPERA_HORN_REACTION_TEST === '1' || process.env.OPERA_RAILWAY_TEST === '1' || process.env.OPERA_SYSTEMS_TEST === '1' || process.env.OPERA_EXIT_TRANSITION_TEST === '1' || process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1';
 const loadDeadline = Date.now() + (fastFallbackTest ? 5000 : 40000);
 while (Date.now() < loadDeadline) {
   const readiness = await command('Runtime.evaluate', { expression: `document.querySelector('#start') && !document.querySelector('#start').disabled`, returnByValue: true });
@@ -122,6 +122,16 @@ if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
   if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || elapsed > 8000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled: ${JSON.stringify({ elapsed, state, runtimeExceptions })}`);
   socket.close();
   console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', elapsed, state }, null, 2));
+  process.exit(0);
+}
+if (process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1') {
+  const evaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.forceRoundaboutYield(); window.__carDodgeTest?.step(4); window.__carDodgeTest?.roundaboutYieldState()`, returnByValue: true });
+  if (evaluation.exceptionDetails) throw new Error(`Roundabout yield browser exception: ${JSON.stringify(evaluation.exceptionDetails)}`);
+  const traffic = evaluation.result.value;
+  if (traffic.length !== 2 || traffic.some(vehicle => vehicle.speed > .2 || !vehicle.braking || vehicle.distance < 18)) throw new Error(`Traffic failed to give way to player in roundabout: ${JSON.stringify(traffic)}`);
+  if (runtimeExceptions.length) throw new Error(`Roundabout yield uncaught errors: ${JSON.stringify(runtimeExceptions)}`);
+  socket.close();
+  console.log(JSON.stringify({ browser: version.Browser, roundaboutYield: 'passed', traffic }, null, 2));
   process.exit(0);
 }
 async function press(code, key, windowsVirtualKeyCode) {
