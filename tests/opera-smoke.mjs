@@ -136,6 +136,16 @@ if (process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1') {
   console.log(JSON.stringify({ browser: version.Browser, roundaboutYield: 'passed', traffic }, null, 2));
   process.exit(0);
 }
+if (process.env.OPERA_ARRIVAL_MENU_TEST === '1') {
+  const evaluation = await command('Runtime.evaluate', { expression: `(() => { const active=Object.keys(window.__carDodgeTest||{}); window.__carDodgeTest?.forceArrival?.(); return active; })()`, returnByValue: true });
+  if (evaluation.exceptionDetails) throw new Error(`Arrival browser exception: ${JSON.stringify(evaluation.exceptionDetails)}`);
+  const menu = await command('Runtime.evaluate', { expression: `(() => ({mode:window.__carDodgeTest?.state()?.mode,destinations:document.querySelectorAll('#card .destination-choice').length,cars:document.querySelectorAll('#card .car-choice').length,weather:document.querySelectorAll('#card .weather-choice').length,time:document.querySelectorAll('#card .time-choice').length,button:document.querySelector('#card #action')?.textContent}))()`, returnByValue: true });
+  const state = menu.result.value;
+  if (state.mode !== 'arrived' || state.destinations !== 4 || state.cars < 6 || state.weather < 5 || state.time < 5 || !state.button?.includes('next')) throw new Error(`Arrival journey menu failed: ${JSON.stringify(state)}`);
+  socket.close();
+  console.log(JSON.stringify({browser:version.Browser,arrivalMenu:'passed',state},null,2));
+  process.exit(0);
+}
 async function press(code, key, windowsVirtualKeyCode) {
   await command('Input.dispatchKeyEvent', { type: 'keyDown', code, key, windowsVirtualKeyCode, nativeVirtualKeyCode: windowsVirtualKeyCode });
   await command('Input.dispatchKeyEvent', { type: 'keyUp', code, key, windowsVirtualKeyCode, nativeVirtualKeyCode: windowsVirtualKeyCode });
