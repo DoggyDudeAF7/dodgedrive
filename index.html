@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#121827">
-  <title>Car Dodge 3D</title>
+  <title>DodgeDrive Simulator</title>
   <style>
     :root{--ink:#121827;--paper:#fff8e7;--yellow:#ffd33d;--red:#ed4b34}
     *{box-sizing:border-box}html,body{height:100%}
@@ -57,6 +57,7 @@
     function newRandomSeed(){const number=globalThis.crypto?.getRandomValues?crypto.getRandomValues(new Uint32Array(1))[0]%1000000:Math.floor(Math.random()*1000000);return`DODGE-${String(number).padStart(6,'0')}`}
     function dailySeed(){const date=new Date(),stamp=`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`;return`DAILY-${stamp}`}
 
+    document.querySelector('.brand h1').innerHTML='DodgeDrive <span>Simulator</span>';const introCard=document.querySelector('#card');introCard.querySelector('.tag').textContent='An open-road Australian driving simulator.';introCard.querySelector('h2').innerHTML='DodgeDrive<br>Simulator';introCard.querySelector('p').textContent='Drive naturally through cities, suburbs, motorways and country roads. Follow signs, choose exits, manage traffic, weather and vehicle damage.';
     const host=document.querySelector('#game'),overlay=document.querySelector('#overlay'),card=document.querySelector('#card');
     const runSeedEl=document.createElement('div');runSeedEl.className='run-seed';runSeedEl.id='runSeed';host.append(runSeedEl);
     const scoreEl=document.querySelector('#score'),pointsEl=document.querySelector('#points'),comboEl=document.querySelector('#combo'),conditionEl=document.querySelector('#condition'),missionEl=document.querySelector('#mission'),wantedEl=document.querySelector('#wanted'),speedLimitEl=document.querySelector('#speedLimit'),radioHudEl=document.querySelector('#radioHud'),replayBanner=document.querySelector('#replayBanner'),routeFade=document.querySelector('#routeFade'),viewNameEl=document.querySelector('#viewName'),speedEl=document.querySelector('#speed'),driveDataEl=document.querySelector('#driveData'),damageFillEl=document.querySelector('#damageFill'),creditsEl=document.querySelector('#credits'),garageRecordEl=document.querySelector('#garageRecord');
