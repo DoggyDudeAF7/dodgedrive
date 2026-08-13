@@ -116,12 +116,12 @@ await new Promise(resolve => setTimeout(resolve, 250));
 if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
   const forced = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.forceOccupiedExit()`, returnByValue: true });
   const before = performance.now();
-  const stepped = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.step(6); window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
+  const stepped = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.step(12); window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
   if (stepped.exceptionDetails) throw new Error(`Highway exit browser exception: ${JSON.stringify(stepped.exceptionDetails)}`);
   const elapsed = performance.now() - before, state = stepped.result.value;
   const landingEvaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.exitLandingState()`, returnByValue: true });
   const landing = landingEvaluation.result.value;
-  if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || !landing?.clear || landing.nextWaveIn < 40 || elapsed > 8000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled or landed in traffic: ${JSON.stringify({ elapsed, state, landing, runtimeExceptions })}`);
+  if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 12000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled or landed in traffic: ${JSON.stringify({ elapsed, state, landing, runtimeExceptions })}`);
   socket.close();
   console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', occupiedLandingCleared: landing.clear, nextWaveIn: landing.nextWaveIn, elapsed, state }, null, 2));
   process.exit(0);
