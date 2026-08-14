@@ -130,7 +130,7 @@ if (process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1') {
   const evaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.forceRoundaboutYield(); window.__carDodgeTest?.step(4); window.__carDodgeTest?.roundaboutYieldState()`, returnByValue: true });
   if (evaluation.exceptionDetails) throw new Error(`Roundabout yield browser exception: ${JSON.stringify(evaluation.exceptionDetails)}`);
   const traffic = evaluation.result.value;
-  if (traffic.length !== 2 || traffic.some(vehicle => vehicle.speed > .2 || !vehicle.braking || vehicle.distance < 18)) throw new Error(`Traffic failed to give way to player in roundabout: ${JSON.stringify(traffic)}`);
+  if (traffic.length !== 2 || traffic.some(vehicle => vehicle.speed > .2 || !vehicle.braking || vehicle.distance < 29)) throw new Error(`Traffic stopped too close to a roundabout exit: ${JSON.stringify(traffic)}`);
   if (runtimeExceptions.length) throw new Error(`Roundabout yield uncaught errors: ${JSON.stringify(runtimeExceptions)}`);
   socket.close();
   console.log(JSON.stringify({ browser: version.Browser, roundaboutYield: 'passed', traffic }, null, 2));
