@@ -443,7 +443,7 @@
         const atPaintedFork=rampEntranceZ>=car.position.z-5&&rampEntranceZ<=car.position.z+4;
         if(atPaintedFork&&inExitLane){
           event.turning=true;event.turnProgress=0;event.choice=event.destination;event.targetZ=car.position.z;
-          event.exitLayout=event.exitLayout||(event.exitBiome==='city'?'urban':event.exitBiome==='suburbs'?'four-lane':'country');
+          event.exitLayout=event.exitBiome==='city'?'urban':event.exitBiome==='suburbs'?'four-lane':'country';
           G.exitProtection=3;G.nextWaveAt=Infinity;
           for(const o of G.obstacles){
             o.playerFollowing=false;o.playerStopGap=0;
@@ -464,7 +464,7 @@
         return;
       }
 
-      G.speed=THREE.MathUtils.clamp(G.speed,10,14);
+      G.speed=THREE.MathUtils.clamp(G.speed,14,18);
       event.turnProgress=Math.min(1,event.turnProgress+G.speed*dt/curve.getLength());
       const p=event.turnProgress,point=curve.getPoint(p);
       const handoff=THREE.MathUtils.smoothstep(p,.66,1);
@@ -511,7 +511,7 @@
       // Highway exits are now a continuous geometric hand-off; never cover them
       // with the old black transition overlay.
       routeFade.style.opacity='0';G.highwayExitFade=0;G.highwayExitTransition=false;
-      if(event?.kind==='highway-exit'&&event.turning)G.exitProtection=Math.max(G.exitProtection,.35);
+      if(event?.kind==='highway-exit'&&event.turning){G.exitProtection=Math.max(G.exitProtection,.35);G.speed=Math.max(G.speed,14)}
     }
     function roundaboutPathX(relative,lane,direction='forward'){const side=direction==='forward'?-1:1,base=lanes[lane],track=(lane===0||lane===3?7.35:5.95)*side;if(relative>34||relative<-34)return base;if(relative>12)return THREE.MathUtils.lerp(base,track,THREE.MathUtils.smoothstep(34-relative,0,22));if(relative>=-12){const progress=(12-relative)/24;return track+side*1.25*Math.sin(progress*Math.PI)}return THREE.MathUtils.lerp(track,base,THREE.MathUtils.smoothstep(-12-relative,0,22))}
     function prepareRoundaboutExit(event){if(!event||event.kind!=='roundabout'||!event.turning)return;G.exitProtection=Math.max(G.exitProtection,.3);if(event.exitCleared)return;event.exitCleared=true;G.exitProtection=6;for(const o of G.obstacles){if(o.crossTraffic||o.crashed)continue;const entryDistance=o.direction==='forward'?o.mesh.position.z-event.z:event.z-o.mesh.position.z;if(entryDistance>=42)continue;o.hitCooldown=6;o.playerFollowing=false;o.playerStopGap=0;if(entryDistance<27)o.speed=Math.max(o.speed,5.5)}}
