@@ -57,7 +57,7 @@ function command(method, params = {}) {
 await command('Page.enable');
 await command('Runtime.enable');
 if (reuseStartupTab) await command('Page.navigate', { url: testUrl });
-const fastFallbackTest = process.env.OPERA_SCENARIO_TEST === '1' || process.env.OPERA_REPLAY_PARTICLE_TEST === '1' || process.env.OPERA_CRASH_GARAGE_TEST === '1' || process.env.OPERA_LANE_TURN_TEST === '1' || process.env.OPERA_SPEED_STEER_TEST === '1' || process.env.OPERA_HORN_REACTION_TEST === '1' || process.env.OPERA_RAILWAY_TEST === '1' || process.env.OPERA_SYSTEMS_TEST === '1' || process.env.OPERA_EXIT_TRANSITION_TEST === '1' || process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1' || process.env.OPERA_ARRIVAL_MENU_TEST === '1';
+const fastFallbackTest = process.env.OPERA_SCENARIO_TEST === '1' || process.env.OPERA_REPLAY_PARTICLE_TEST === '1' || process.env.OPERA_CRASH_GARAGE_TEST === '1' || process.env.OPERA_LANE_TURN_TEST === '1' || process.env.OPERA_SPEED_STEER_TEST === '1' || process.env.OPERA_HORN_REACTION_TEST === '1' || process.env.OPERA_RAILWAY_TEST === '1' || process.env.OPERA_SYSTEMS_TEST === '1' || process.env.OPERA_EXIT_TRANSITION_TEST === '1' || process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1' || process.env.OPERA_ARRIVAL_MENU_TEST === '1' || process.env.OPERA_MUSIC_TEST === '1';
 const loadDeadline = Date.now() + (fastFallbackTest ? 5000 : 40000);
 while (Date.now() < loadDeadline) {
   const readiness = await command('Runtime.evaluate', { expression: `document.querySelector('#start') && !document.querySelector('#start').disabled`, returnByValue: true });
@@ -65,6 +65,17 @@ while (Date.now() < loadDeadline) {
   await new Promise(resolve => setTimeout(resolve, 500));
 }
 if (process.env.OPERA_WAIT_DETAILED === '1') await new Promise(resolve => setTimeout(resolve, 5000));
+
+if (process.env.OPERA_MUSIC_TEST === '1') {
+  const evaluation = await command('Runtime.evaluate', { expression: 'window.__carDodgeTest?.auditSoundtracks()', awaitPromise: true, returnByValue: true });
+  if (evaluation.exceptionDetails) throw new Error(`Soundtrack browser exception: ${JSON.stringify(evaluation.exceptionDetails)}`);
+  const tracks = evaluation.result.value || {}, entries = Object.entries(tracks);
+  if (entries.length !== 15 || entries.some(([, track]) => !track.title || track.events < 1 || track.duration <= 2)) throw new Error(`Soundtrack pack failed validation: ${JSON.stringify(tracks)}`);
+  if (runtimeExceptions.length) throw new Error(`Soundtrack uncaught errors: ${JSON.stringify(runtimeExceptions)}`);
+  socket.close();
+  console.log(JSON.stringify({ browser: version.Browser, soundtrackPack: 'passed', tracks }, null, 2));
+  process.exit(0);
+}
 
 if (process.env.OPERA_LAMP_AUDIT === '1') {
   const outputDir = new URL('../.lamp-audit/', import.meta.url);
