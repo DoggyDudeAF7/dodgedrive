@@ -77,6 +77,16 @@ if (process.env.OPERA_MUSIC_TEST === '1') {
   process.exit(0);
 }
 
+if (process.env.OPERA_MODE_SELECT_TEST === '1') {
+  const evaluation = await command('Runtime.evaluate', { expression: `(() => { const initial=window.__carDodgeTest?.modeState(); document.querySelector('[data-mode="career"]')?.click(); const career=window.__carDodgeTest?.modeState(); document.querySelector('#modeBack')?.click(); document.querySelector('[data-mode="racing"]')?.click(); const racing=window.__carDodgeTest?.modeState(); document.querySelector('[data-start-game]')?.click(); const started=window.__carDodgeTest?.modeState(); return {initial,career,racing,started}; })()`, returnByValue: true });
+  if (evaluation.exceptionDetails) throw new Error(`Mode selection browser exception: ${JSON.stringify(evaluation.exceptionDetails)}`);
+  const state = evaluation.result.value;
+  if (state.initial.modeButtons !== 2 || state.initial.destinations !== 0 || state.career.gameplayMode !== 'career' || state.career.destinations < 2 || state.racing.gameplayMode !== 'racing' || !state.racing.racingNote || state.racing.destinations !== 0 || state.started.routeStage !== 'racing' || state.started.simPanelVisible || state.started.challengeAt > 60 || runtimeExceptions.length) throw new Error(`Career/racing separation failed: ${JSON.stringify({ state, runtimeExceptions })}`);
+  socket.close();
+  console.log(JSON.stringify({ browser: version.Browser, modeSelection: 'passed', state }, null, 2));
+  process.exit(0);
+}
+
 if (process.env.OPERA_LAMP_AUDIT === '1') {
   const outputDir = new URL('../.lamp-audit/', import.meta.url);
   await mkdir(outputDir, { recursive: true });
