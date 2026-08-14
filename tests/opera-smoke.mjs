@@ -78,6 +78,12 @@ if (process.env.OPERA_MUSIC_TEST === '1') {
 }
 
 if (process.env.OPERA_MODE_SELECT_TEST === '1') {
+  const assetDeadline = Date.now() + 30000;
+  while (Date.now() < assetDeadline) {
+    const ready = await command('Runtime.evaluate', { expression: 'window.__carDodgeTest?.modeState().assetsReady', returnByValue: true });
+    if (ready.result.value) break;
+    await new Promise(resolve => setTimeout(resolve, 250));
+  }
   const evaluation = await command('Runtime.evaluate', { expression: `(() => { const initial=window.__carDodgeTest?.modeState(); document.querySelector('[data-mode="career"]')?.click(); const career=window.__carDodgeTest?.modeState(); document.querySelector('#modeBack')?.click(); document.querySelector('[data-mode="racing"]')?.click(); const racing=window.__carDodgeTest?.modeState(); document.querySelector('[data-start-game]')?.click(); const started=window.__carDodgeTest?.modeState(); return {initial,career,racing,started}; })()`, returnByValue: true });
   if (evaluation.exceptionDetails) throw new Error(`Mode selection browser exception: ${JSON.stringify(evaluation.exceptionDetails)}`);
   const state = evaluation.result.value;
