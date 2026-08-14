@@ -643,8 +643,8 @@
     function resize(){const r=host.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
     document.querySelector('#start').onclick=e=>{e.stopPropagation();startSimulator()};pauseBtn.onclick=e=>{e.stopPropagation();pause()};viewBtn.onclick=e=>{e.stopPropagation();cycleView()};weatherBtn.onclick=e=>{e.stopPropagation();cycleWeather()};soundBtn.onclick=e=>{e.stopPropagation();G.muted=!G.muted;if(G.muted){stopHorn();silenceDrivingAudio()}soundBtn.textContent=G.muted?'🔇':'🔊'};
     const initialCarSelect=document.querySelector('#carSelect');if(initialCarSelect)initialCarSelect.innerHTML=Object.entries(CAR_CONFIGS).map(([id,config])=>`<button class="car-choice${id===G.selectedCar?' active':''}${PROFILE.unlocked.includes(id)?'':' locked'}" data-car="${id}">${config.label.toUpperCase()}<small>${PROFILE.unlocked.includes(id)?GARAGE_COPY[id]:`🔒 ${config.cost.toLocaleString()}`}</small></button>`).join('');
-    radioHudEl.onclick=e=>{e.stopPropagation();cycleRadio()};document.querySelector('#start')?.insertAdjacentHTML('beforebegin',simulatorMenuMarkup()+seedControlsMarkup());
-    bindGarageControls(document);
+    radioHudEl.onclick=e=>{e.stopPropagation();cycleRadio()};
+    bindGarageControls(document);showModeSelection();
     setTimeMode(G.timeMode);
     addEventListener('keydown',e=>{
       if(['ArrowLeft','KeyA'].includes(e.code)){keys.left=true;e.preventDefault()}
@@ -664,7 +664,7 @@
       if(e.code==='BracketRight'&&!e.repeat){shiftManual(1);e.preventDefault()}
       if(e.code==='BracketLeft'&&!e.repeat){shiftManual(-1);e.preventDefault()}
       if(['Escape','KeyP'].includes(e.code)&&!e.repeat)pause();
-      if((e.code==='Space'||e.code==='Enter')&&(G.mode==='ready'||G.mode==='crashed'))startSimulator()
+      if((e.code==='Space'||e.code==='Enter')&&(G.mode==='crashed'||G.mode==='ready'&&G.menuStage==='setup'))startSelectedMode()
     });
     addEventListener('keyup',e=>{if(['ArrowLeft','KeyA'].includes(e.code))keys.left=false;if(['ArrowRight','KeyD'].includes(e.code))keys.right=false;if(['ArrowUp','KeyW'].includes(e.code))keys.gas=false;if(['ArrowDown','KeyS'].includes(e.code))keys.brake=false;if(e.code==='KeyH')stopHorn()});
     for(const b of document.querySelectorAll('.steer')){const d=+b.dataset.dir;b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);d<0?keys.left=true:keys.right=true};const release=()=>{d<0?keys.left=false:keys.right=false};b.onpointerup=release;b.onpointercancel=release;b.onlostpointercapture=release}
