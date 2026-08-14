@@ -121,9 +121,9 @@ if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
   const elapsed = performance.now() - before, state = stepped.result.value;
   const landingEvaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.exitLandingState()`, returnByValue: true });
   const landing = landingEvaluation.result.value;
-  if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 12000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled or landed in traffic: ${JSON.stringify({ elapsed, state, landing, runtimeExceptions })}`);
+  if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || state.damage > .01 || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 12000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled, caused damage, or landed in traffic: ${JSON.stringify({ elapsed, state, landing, runtimeExceptions })}`);
   socket.close();
-  console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', occupiedLandingCleared: landing.clear, nextWaveIn: landing.nextWaveIn, elapsed, state }, null, 2));
+  console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', damageDuringExit: state.damage, occupiedLandingCleared: landing.clear, nextWaveIn: landing.nextWaveIn, elapsed, state }, null, 2));
   process.exit(0);
 }
 if (process.env.OPERA_ROUNDABOUT_YIELD_TEST === '1') {
