@@ -143,13 +143,15 @@ const result = evaluation.result.value;
 await new Promise(resolve => setTimeout(resolve, 250));
 if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
   const forced = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.forceOccupiedExit()`, returnByValue: true });
+  const geometryEvaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
+  const geometry = geometryEvaluation.result.value;
   const before = performance.now();
-  const stepped = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.step(12); window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
+  const stepped = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.step(16); window.__carDodgeTest?.exitTransitionState()`, returnByValue: true });
   if (stepped.exceptionDetails) throw new Error(`Highway exit browser exception: ${JSON.stringify(stepped.exceptionDetails)}`);
   const elapsed = performance.now() - before, state = stepped.result.value;
   const landingEvaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.exitLandingState()`, returnByValue: true });
   const landing = landingEvaluation.result.value;
-  if (!forced.result.value || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || state.damage > .01 || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 12000 || runtimeExceptions.length) throw new Error(`Highway exit transition stalled, caused damage, or landed in traffic: ${JSON.stringify({ elapsed, state, landing, runtimeExceptions })}`);
+  if (!forced.result.value || !geometry.attachedEnd || Math.abs(geometry.attachedEnd[0]+1.8)>.1 || geometry.attachedEnd[2]>-120 || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || state.roadLayout !== 'urban' || Math.abs(state.roadScale-.82)>.01 || state.damage > .01 || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 15000 || runtimeExceptions.length) throw new Error(`Highway exit did not attach cleanly to its correctly sized destination road: ${JSON.stringify({ elapsed, geometry, state, landing, runtimeExceptions })}`);
   socket.close();
   console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', damageDuringExit: state.damage, occupiedLandingCleared: landing.clear, nextWaveIn: landing.nextWaveIn, elapsed, state }, null, 2));
   process.exit(0);
