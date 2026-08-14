@@ -1,5 +1,0 @@
-2026/08/14-12:04:26.260 5f88 Creating DB C:\Users\student\.vscode\DIGITECH1\.edge-music-test\Default\EdgeCoupons/coupons_data.db since it was missing.
-2026/08/14-12:04:26.313 5f88 Reusing MANIFEST C:\Users\student\.vscode\DIGITECH1\.edge-music-test\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
-2026/08/14-12:04:26.863 6474 Level-0 table #5: started
-2026/08/14-12:04:26.871 6474 Level-0 table #5: 683273 bytes OK
-2026/08/14-12:04:26.874 6474 Delete type=0 #3
