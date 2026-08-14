@@ -106,7 +106,8 @@ if (process.env.OPERA_LAMP_AUDIT === '1') {
 
 const expression = `(() => {
   const canvas = document.querySelector('canvas');
-  const start = document.querySelector('#start');
+  document.querySelector('[data-mode="career"]')?.click();
+  const start = document.querySelector('#start, #action[data-start-game]');
   const weather = document.querySelector('[data-weather="rain"]');
   weather?.click();
   start?.click();
