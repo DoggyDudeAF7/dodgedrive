@@ -1,6 +1,6 @@
 .auto-publish/
 .lamp-audit/
+.edge-*-test/
 .DS_Store
 Thumbs.db
 *.log
-
