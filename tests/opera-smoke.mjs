@@ -151,7 +151,7 @@ if (process.env.OPERA_EXIT_TRANSITION_TEST === '1') {
   const elapsed = performance.now() - before, state = stepped.result.value;
   const landingEvaluation = await command('Runtime.evaluate', { expression: `window.__carDodgeTest?.exitLandingState()`, returnByValue: true });
   const landing = landingEvaluation.result.value;
-  if (!forced.result.value || !geometry.attachedEnd || Math.abs(geometry.attachedEnd[0]+1.8)>.1 || geometry.attachedEnd[2]>-120 || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || state.roadLayout !== 'urban' || Math.abs(state.roadScale-.82)>.01 || state.damage > .01 || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 15000 || runtimeExceptions.length) throw new Error(`Highway exit did not attach cleanly to its correctly sized destination road: ${JSON.stringify({ elapsed, geometry, state, landing, runtimeExceptions })}`);
+  if (!forced.result.value || !geometry.attachedEnd || Math.abs(geometry.attachedEnd[0]+34)>.2 || geometry.attachedEnd[2]>-125 || state.mode !== 'playing' || state.event || state.fade !== 0 || state.biome !== 'city' || state.roadLayout !== 'urban' || Math.abs(state.roadScale-.82)>.01 || state.damage > .01 || !landing?.clear || landing.nextWaveIn < 20 || elapsed > 15000 || runtimeExceptions.length) throw new Error(`Highway exit did not attach cleanly to its separate, correctly sized destination road: ${JSON.stringify({ elapsed, geometry, state, landing, runtimeExceptions })}`);
   socket.close();
   console.log(JSON.stringify({ browser: version.Browser, highwayExit: 'passed', damageDuringExit: state.damage, occupiedLandingCleared: landing.clear, nextWaveIn: landing.nextWaveIn, elapsed, state }, null, 2));
   process.exit(0);
